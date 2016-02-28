@@ -9,16 +9,19 @@
     <link href='https://fonts.googleapis.com/css?family=Cabin' rel='stylesheet' type='text/css'>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.1.2/ui-bootstrap-tpls.min.js"></script>
+     <script src="./bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+     <script src="./bower_components/angular-animate/angular-animate.min.js"></script>
+     <script src="./bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular-animate.min.js"></script>
-     
+
     <script src="/app/app.js"></script>
     <script src="/app/controller.js"></script>
-<!--     // <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPvz5GX-N_onKVobBHRUlI_8Z4PtaU9Es&libraries=places&callback=loadAllItems"></script> -->
+    
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ7LkVku9QD7r6fLEt12cCW0RHDTn7nFo&libraries=places&callback=loadAllItems"></script>
   </head>
   <body id="#" ng-app="myApp" ng-controller="FormController">
-    <nav class="navbar-fixed">
+  
+     <nav class="navbar-fixed">
      <div id="headerSection" class="container-fluid">
       <ul>
         <li><img id="beeIcon" src="bee1resize.png"></li>
@@ -64,7 +67,10 @@
           <button id="fillIp" type="submit" ng-click="ip()">Or use current location</button>
           <div class="spinner"><img src="loading.gif"></div><br><br>
             <button class="yellowButton submitForm" type="submit" ng-click="sendPost()" >
-              <a href="#">Submit </a>
+              <a href="#">Submit a Free Event </a>
+            </button>
+            <button class="yellowButton submitForm" type="submit" ng-click="sendPost()" >
+              <a href="#">Submit Free Muscle </a>
             </button>
             <button class="yellowButton submitForm" type="submit" ng-click="removePost()">
               <a href="#"> Delete</a>
@@ -84,5 +90,6 @@
           &copy;Brought to you by INeedClosure, a subsidiary Company of MKS31<br>611 Mission Street, San Francisco, CA 94105
         </div>
     </div>
+    <!-- <div ui-view></div> -->
   </body>
 </html>

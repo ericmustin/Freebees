@@ -1,5 +1,7 @@
 angular.module('map.services', [])
 
+
+
 .factory('Map', function($http){
   return {
     initMap: initMap,
@@ -7,7 +9,9 @@ angular.module('map.services', [])
     map: map,
     geocoder: geocoder,
     addMarker: addMarker,
-    infoWindow: infoWindow
+    infoWindow: infoWindow,
+    startSpinner: startSpinner,
+    stopSpinner: stopSpinner
   };
 });
 
@@ -106,8 +110,9 @@ var addMarker = function(map, instance, infoWindow, timeout){
 
     //creates a listener that will attach this instance's data to the global info window and open it
     google.maps.event.addListener(marker, 'click', function(){
+
       //turn our mongo-stored stringified date into a JS date obj that is then formatted
-      infoWindow.setContent(instance.itemName+' <br><span class="createdAt">'+formatDate(new Date(instance.createdAt))+'</span>');
+      infoWindow.setContent(instance.itemName+' <br><button class="createdAt" value="500" onclick="uberInfo('+instance.itemLat+','+instance.itemLng+',this)" data-lat="'+instance.itemLat+'" data-lng="'+instance.itemLng+'">This Item Was posted on '+formatDate(new Date(instance.createdAt))+' and is good until '+instance.eventTime.month+'/'+instance.eventTime.day+' </button>');
       infoWindow.open(map, this);
     });
   }, timeout);

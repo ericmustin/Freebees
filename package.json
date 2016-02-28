@@ -36,21 +36,29 @@
     "grunt-express-server": "0.5.2",
     "grunt-karma": "0.12.1",
     "grunt-mocha": "0.4.15",
+    "jasmine-core": "2.4.1",
     "karma": "0.13.21",
     "karma-browserify": "5.0.2",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "0.2.2",
+    "karma-coverage": "0.5.3",
+    "karma-jasmine": "0.3.7",
     "karma-mocha": "0.2.2",
+    "karma-phantomjs-launcher": "1.0.0",
+    "karma-requirejs": "0.2.5",
     "mocha": "2.4.5",
     "mongoose": "4.4.3"
   },
   "dependencies": {
+    "angular-ui-bootstrap": "1.1.2",
     "body-parser": "1.15.0",
     "bower": "1.7.7",
     "express": "^4.13.4",
     "grunt": "0.4.5",
+    "karma-jasmine-html-reporter": "0.2.0",
     "mongoose": "4.4.3",
     "morgan": "1.6.1",
+    "node-uber": "0.0.7",
     "q": "1.4.1"
   }
 }
