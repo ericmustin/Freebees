@@ -22,7 +22,7 @@ var uber = new Uber({
   client_id: 'r8Q7bWfTqKGFWqdadWim3Uai5KVoC6pF',
   client_secret: '1iUhwPCXUE3l439R4vq4OICDdOMmOGhPq6ri0ey0',
   server_token: 'GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0',
-  redirect_uri: 'Pmates2People.herokuapp.com',
+  redirect_uri: 'http://localhost/callback',
   name: 'Pmates2People.herokuapp.com'
 });
 
@@ -30,12 +30,18 @@ var uber = new Uber({
 
 module.exports = {
 
+ 
   uberInfo: function( req, res) {
+    var url2='https://login.uber.com/oauth/authorize/v1/estimates/price?start_latitude='+req.body.startLat+'&start_longitude='+req.body.startLng+'&end_latitude='+req.body.endLat+'&end_longitude='+req.body.endLng+'&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
+
     var url = 'https://sandbox-api.uber.com/v1/estimates/price?start_latitude='+req.body.startLat+'&start_longitude='+req.body.startLng+'&end_latitude='+req.body.endLat+'&end_longitude='+req.body.endLng+'&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
     var options =  {
     url: url,
     method: 'GET'
   };
+
+
+
   request.get(options, function(err, response,body) {      
       console.log(body);
       var prices = JSON.parse(body);

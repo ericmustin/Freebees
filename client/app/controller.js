@@ -14,6 +14,7 @@ var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', '
 //dependencies injected include DBActions factory and Map factory
 .controller('FormController', function($scope, $http, DBActions, Map){
 $scope.user = {};
+
 $scope.datepickers = {
         dt: false,
         dtSecond: false
@@ -75,14 +76,14 @@ $scope.toggleMin = function() {
      if(obj.month < 10) {
       obj.month = '0'+obj.month;
     }
-    obj.year = date.getYear();
+    obj.year = date.getYear().toString().slice(-2);
     obj.start = 12;
     obj.end = 13;
     return obj;
   };
 
   window.uberInfo = function(lat,lng,thing) {
-    console.log('holla?');
+    // console.log('holla?');
     if(navigator.geolocation){
         var latitude;
         var longitude;
@@ -110,6 +111,7 @@ $scope.toggleMin = function() {
      }
     $scope.user = {};
     $scope.search = {};
+
   };
 
   //define function within this controller to convert a string to lowerCase for standardization
@@ -159,7 +161,7 @@ $scope.toggleMin = function() {
 
   //fills in the address field with current lat/lng
   $scope.ip = function(){
-    startSpinner();
+    Map.startSpinner();
     //check for the HTML5 geolocation feature, supported in most modern browsers
     if (navigator.geolocation){
       //async request to get users location from positioning hardware
@@ -167,8 +169,12 @@ $scope.toggleMin = function() {
         //if getCurrentPosition is method successful, returns a coordinates object
         var lat = position.coords.latitude;
         var long = position.coords.longitude;
+        if(document.getElementById('inputAddress') !== null) {
         document.getElementById('inputAddress').value = lat + ', ' + long;
-        stopSpinner();
+        
+        }
+        console.log('sup playa');
+        Map.stopSpinner();
       });
     } else {
       error('Geo Location is not supported');
@@ -187,7 +193,7 @@ $scope.toggleMin = function() {
     //after item has been saved to db, returned data has a data property
     //so we need to access data.data, see below
     .then(function(data){
-      stopSpinner();
+      Map.stopSpinner();
       //data.data has itemName prop, itemLocation prop, and _id prop, which are all expected since this is how
       //our mongoDB is formatted. Anything returned from db should have these props
       Map.addMarker(map, data.data, infoWindow);
