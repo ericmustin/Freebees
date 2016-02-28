@@ -8,6 +8,7 @@ for some edge cases. We use both methods for practice implementing both and rema
 individual file.*/
 
 var mongoose = require('mongoose');
+var request = require('request');
 
 //Item is a model (i.e. row) that fits into the db, it has itemName and itemLocation props
 var Item = require('./itemModel.js');
@@ -15,7 +16,39 @@ var Item = require('./itemModel.js');
 //Q's nbind() method used below to promisify methods, although this will only be helpful for future features
 var Q = require('q');
 
+var Uber = require('node-uber');
+
+var uber = new Uber({
+  client_id: 'r8Q7bWfTqKGFWqdadWim3Uai5KVoC6pF',
+  client_secret: '1iUhwPCXUE3l439R4vq4OICDdOMmOGhPq6ri0ey0',
+  server_token: 'GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0',
+  redirect_uri: 'Pmates2People.herokuapp.com',
+  name: 'Pmates2People.herokuapp.com'
+});
+
+
+
 module.exports = {
+
+  uberInfo: function( req, res) {
+    var url = 'https://sandbox-api.uber.com/v1/estimates/price?start_latitude='+req.body.startLat+'&start_longitude='+req.body.startLng+'&end_latitude='+req.body.endLat+'&end_longitude='+req.body.endLng+'&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
+    var options =  {
+    url: url,
+    method: 'GET'
+  };
+  request.get(options, function(err, response,body) {      
+      console.log(body);
+      var prices = JSON.parse(body);
+
+    var bestPrice = (prices.prices[0].estimate);
+    var obj = {}
+    obj.bestPrice = bestPrice;
+    res.send(obj);
+
+  });
+},
+
+
   saveItem : function (req, res) {
     //extract itemName and itemLocation from the post request's body
     var itemName = req.body.item;
@@ -23,6 +56,16 @@ module.exports = {
     var date = req.body.createdAt;
     var eventTime=req.body.eventTime;
     var create;
+    var url = 'https://sandbox-api.uber.com/v1/estimates/price?start_latitude='+itemLocation.lat+'&start_longitude='+itemLocation.lng+'&end_latitude=37.7878865&end_longitude=-122.40005629999997&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
+    var options =  {
+    url: url,
+    method: 'GET'
+  };
+  request.get(options, function(err, response,body) {      
+      console.log(body);
+      var prices = JSON.parse(body);
+
+    var bestPrice = (prices.prices[0].estimate);
 
     //The below line returns promisified version of Item.findOne bound to context Item
     //This is necessary because we will only create a new model after we search the db to see if it already exists
@@ -42,13 +85,17 @@ module.exports = {
           //Q.nbind() promisifies its first argument, so now you could chain a .then() after create
           //the .then() below could be helpful for future features
           create = Q.nbind(Item.create, Item);
+
+          var
           newItem = {
             itemName: itemName,
             itemLocation: itemLocation,
             itemLng: itemLocation.lng,
             itemLat: itemLocation.lat,
             eventTime: eventTime,
-            createdAt: date
+            createdAt: date,
+            price: bestPrice
+     
           };
 
           // In mongoose, .create() automaticaly creates AND saves simultaneously
@@ -64,6 +111,7 @@ module.exports = {
       .catch(function(err){
         console.log('Error when findOne invoked - searching db for specific item failed. Error: ', err);
       });
+    });
   },
 
   //The below function returns all rows from the db. It is called whenever user visits '/' or '/api/links'

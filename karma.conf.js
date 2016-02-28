@@ -10,18 +10,21 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'browserify'],
+    frameworks: ['jasmine'],
 
 
     // list of files / patterns to load in the browser
     files: [
         'client/bower_components/angular/**/*.js',
         'client/bower_components/angular-mocks/**/*.*',
+        'client/bower_components/angular-bootstrap/*.js',
+        'client/bower_components/angular-animate/*.js',
         'client/app/app.js',
         'client/app/controller.js',
         'client/app/**/*.js',
+        'client/index.html',
 
-      'specs/**/*.js'
+      'specs/test.js'
     ],
 
 
@@ -34,14 +37,14 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'specs/*.js': [ 'browserify' ]
+       
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress','kjhtml'],
 
     
     // web server port
@@ -51,12 +54,19 @@ module.exports = function(config) {
     // enable / disable colors in the output (reporters and logs)
     colors: true,
 
+   
+
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
-
+    client: {
+        jasmine: {
+            reporter: 'html',
+            ui: 'bdd'
+        }
+    },
     
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -84,7 +94,9 @@ module.exports = function(config) {
         'karma-coverage',
         'karma-mocha',
         'karma-chai',
-        'karma-chrome-launcher'
+        'karma-chrome-launcher',
+        'karma-jasmine',
+        'karma-jasmine-html-reporter'
     ]
   })
 }

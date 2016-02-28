@@ -1,12 +1,23 @@
-var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate'])
+var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', 'ui.router'])
 
+.config(function ($stateProvider, $urlRouterProvider) {
+  $stateProvider
+  .state('home',
+  {
+    templateUrl: "./home.html",
+    url: '/home',
+    controller: 'FormController'
+  });
+
+  $urlRouterProvider.otherwise('/home');
+})
 //dependencies injected include DBActions factory and Map factory
 .controller('FormController', function($scope, $http, DBActions, Map){
-  $scope.user = {};
+$scope.user = {};
 $scope.datepickers = {
         dt: false,
         dtSecond: false
-      }
+      };
 $scope.formData = {};
 $scope.today = function() {
         $scope.formData.dt = new Date();
@@ -26,7 +37,7 @@ $scope.disabled = function(date, mode) {
         return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
       };
 
-      $scope.toggleMin = function() {
+$scope.toggleMin = function() {
         $scope.minDate = ( $scope.minDate ) ? null : new Date();
       };
       $scope.toggleMin();
@@ -51,31 +62,52 @@ $scope.disabled = function(date, mode) {
       console.log($scope.formData.dt);
 
 
-  var dateAdjust = function(date) {
+  $scope.dateAdjust = function(date) {
     var obj = {};
-    obj.day = date.getDay();
+    obj.day = date.getDate();
+    console.log(obj.day);
     if(obj.day < 10) {
       obj.day = '0'+obj.day;
     }
 
     obj.month = date.getMonth();
+    obj.month+=1;
      if(obj.month < 10) {
-      obj.day = '0'+obj.day;
+      obj.month = '0'+obj.month;
     }
-    obj.year = date.getYear();;
+    obj.year = date.getYear();
     obj.start = 12;
-    obj.end = 13
-    return obj
-  }
+    obj.end = 13;
+    return obj;
+  };
+
+  window.uberInfo = function(lat,lng,thing) {
+    console.log('holla?');
+    if(navigator.geolocation){
+        var latitude;
+        var longitude;
+        navigator.geolocation.getCurrentPosition(function(position){
+            startLat = position.coords.latitude;
+            startLng = position.coords.longitude;
+     $http.post('/api/uber', {startLat: startLat, startLng: startLng, endLat: lat, endLng: lng})
+      .then(function(data){
+
+       thing.firstChild.data+=". An Uber Ride Here would now cost: "+data.data.bestPrice;
+       
 
 
-
-
-
+      }, function(err){
+        console.log('Error when filterDB invoked - get from "/api/items" failed. Error: ', err);
+      });
+    });
+      }
+  };
 
   $scope.clearForm = function(){
     //need a way to clear addresses filled with autocomplete, angular doesn't detect autocomplete as a change in DOM
+    if(document.getElementById('inputAddress') !== null) {
     document.getElementById('inputAddress').value = '';
+     }
     $scope.user = {};
     $scope.search = {};
   };
@@ -90,10 +122,11 @@ $scope.disabled = function(date, mode) {
 
     var lowerCaseItem = convertToLowerCase($scope.user.item);
     //convert inputted address, need to get value with JS bc angular can't detect autocomplete
-    var inputtedAddress = document.getElementById('inputAddress').value;
-    Map.geocodeAddress(geocoder, Map.map, inputtedAddress, function(converted){
+    //
+    $scope.inputtedAddress =  document.getElementById('inputAddress').value;
+    Map.geocodeAddress(geocoder, Map.map, $scope.inputtedAddress, function(converted){
       //after address converted, save user input item and location to db
-      DBActions.saveToDB({item: lowerCaseItem, LatLng: converted, createdAt: new Date(), eventTime: dateAdjust($scope.formData.dt)});
+      DBActions.saveToDB({item: lowerCaseItem, LatLng: converted, createdAt: new Date(), eventTime: $scope.dateAdjust($scope.formData.dt)});
     });
     $scope.clearForm();
   };
@@ -141,6 +174,7 @@ $scope.disabled = function(date, mode) {
       error('Geo Location is not supported');
     }
   };
+
   $scope.clearForm();
 })
 

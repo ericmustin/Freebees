@@ -33,6 +33,10 @@ var ItemSchema = new mongoose.Schema ({
   eventTime: {
     type: Object,
     required: true
+  },
+  price: {
+    type: String,
+    required: true
   }
 });
 

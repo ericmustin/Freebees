@@ -136,6 +136,13 @@ Map
   margin-right: auto;
   padding-top: 70px;
 }
+.input-group{
+    height: 50%;
+  width: 57%;
+
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .createdAt {
   font-size: 10px;
