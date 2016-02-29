@@ -55,6 +55,10 @@ var loadAllItems = function(){
     type: 'GET',
     success: function(data){
       initMap(data);
+      //add autocomplete functionality to address input field using google maps api
+      var input = document.getElementById('inputAddress') || '611 Mission St';
+      var options = {};
+      var autocomplete = new google.maps.places.Autocomplete(input, options);
     },
     error: function(jqXHR, exception){
       errorHandler(jqXHR, exception);
@@ -77,10 +81,6 @@ var initMap = function(data){
   for (var i = 0; i < data.length; i++){
     addMarker(map, data[i], infoWindow, i*30);
   }
-  //add autocomplete functionality to address input field using google maps api
-  var input = document.getElementById('inputAddress');
-  var options = {};
-  var autocomplete = new google.maps.places.Autocomplete(input, options);
 };
 
 /*add a marker to map. Instance needs to be an obj with itemLocation and itemName properties. The last parameter, timeout 
@@ -99,12 +99,35 @@ var addMarker = function(map, instance, infoWindow, timeout){
       anchor: new google.maps.Point(0, 61)
     };
 
+    var image2 = {
+      //horizontal bee
+      //url: 'https://openclipart.org/image/90px/svg_to_png/221154/Cartoon-Bee.png',
+      url: 'http://www.i2clipart.com/cliparts/2/1/0/c/clipart-muscle-210c.png',
+      // This marker is 41 pixels wide by 61 pixels high.
+      size: new google.maps.Size(41, 61),
+      // The origin for this image is (0, 0).
+      origin: new google.maps.Point(0, 0),
+      // The anchor for this image is the base of the flagpole at (0, 61).
+      anchor: new google.maps.Point(0, 61)
+    };
+
+    var nameOnDom;
+    var imageChoice;
+    if(instance.itemName) {
+      nameOnDom = instance.itemName;
+      imageChoice = image;
+    }
+    else {
+      nameOnDom = instance.worker;
+      imageChoice = image2;
+    }
+
     //create a new instance of a google maps marker, will be created for each item in our db
     var marker = new google.maps.Marker({
       position: instance.itemLocation,
       animation: google.maps.Animation.DROP,
       map: map,
-      icon: image,
+      icon: imageChoice,
       title: 'Hello World!'
     });
 
@@ -112,7 +135,7 @@ var addMarker = function(map, instance, infoWindow, timeout){
     google.maps.event.addListener(marker, 'click', function(){
 
       //turn our mongo-stored stringified date into a JS date obj that is then formatted
-      infoWindow.setContent(instance.itemName+' <br><button class="createdAt" value="500" onclick="uberInfo('+instance.itemLat+','+instance.itemLng+',this)" data-lat="'+instance.itemLat+'" data-lng="'+instance.itemLng+'">This Item Was posted on '+formatDate(new Date(instance.createdAt))+' and is good until '+instance.eventTime.month+'/'+instance.eventTime.day+' </button>');
+      infoWindow.setContent(nameOnDom+' <br><button class="createdAt" value="500" onclick="uberInfo('+instance.itemLat+','+instance.itemLng+',this)" data-lat="'+instance.itemLat+'" data-lng="'+instance.itemLng+'">This Item Was posted on '+formatDate(new Date(instance.createdAt))+' and is good until '+instance.eventTime.month+'/'+instance.eventTime.day+' </button>');
       infoWindow.open(map, this);
     });
   }, timeout);
@@ -143,5 +166,6 @@ var startSpinner = function(){
 };
 
 var stopSpinner = function(){
+  console.log('stopping');
   $('.spinner img').css('visibility', 'hidden');
 };

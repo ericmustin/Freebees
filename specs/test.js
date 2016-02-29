@@ -1,19 +1,25 @@
-describe('first describe', function() {
+describe('Tests for FreeBees', function() {
  
 //module function is from ngMock module, which loads the module it's give
 //so it's available in tests
 
  beforeEach(module('myApp'));
 
- describe('no idea? second describe', function(){
+ describe('Key functions and objects', function(){
    var test;
 
    console.log('we running');
 //inject lets us access the various controllers/factories
-    beforeEach(inject(function($injector){
+    beforeEach(inject(function(_$httpBackend_, $injector){
    $rootScope = $injector.get('$rootScope');
    DBActions = $injector.get('DBActions');
    $http = $injector.get('$http');
+   $httpBackEnd = $injector.get('$httpBackend');
+   $httpBackEnd.when('POST', '/submit').respond({});
+   $httpBackEnd.when('POST', '/api/items').respond({});
+   $httpBackEnd.when('GET', '/api/items').respond({});
+   $httpBackEnd.when('POST', '/api/uberInfo').respond({});
+   $httpBackEnd.when('POST', '/pickup').respond({});
    Map = $injector.get('Map');
    $scope = $rootScope.$new();
 //controller lets us accress the specific controller we want
@@ -57,7 +63,7 @@ describe('first describe', function() {
 
    describe('the formatDate function', function() {
        it('formats a date to this format: mm/dd/yy', function() {
-           expect(formatDate(new Date())).toEqual('2/28/16');
+           expect(formatDate(new Date())).toEqual('2/29/16');
        });
    });
 
@@ -139,18 +145,104 @@ describe('first describe', function() {
 
    });
 
+  describe('the DBActions factory tests', function() {
+    describe('the savetoDB function', function() {
+      it('should send POST /submit for new items to the database', function() {
+        var testObj = {
+          item: 'testobject', 
+          LatLng: {
+            lat: 1,
+            lng: 1
+          }, 
+          createdAt: new Date(),
+          eventTime: {
+            day: 01,
+            month: 01,
+            year: 01
+          }
+        };
+        spyOn(Map, 'stopSpinner');
+        spyOn(Map, 'addMarker');
+        $httpBackEnd.expectPOST('/submit');
+        DBActions.saveToDB(testObj);  
+      });
+    });
+    describe('the filterDB function', function() {
+      it('should send POST to /api/items for filtering', function() {
+        var testString = 'couch';
+        $httpBackEnd.expectPOST('/api/items');
+        DBActions.filterDB(testString);
+      });
+    });
+    describe('the removeDB function', function() {
+      it('should send POST to /pickup for filtering', function() {
+        var testObj = {item: 'couch', LatLng: {lat: 1, lng: 1}}
+        $httpBackEnd.expectPOST('/pickup');
+        DBActions.removeFromDB(testObj);
+      });
+    });
+  });
+
    describe('map Factory tests', function(){
        describe('initMap', function(){
            it('should be a function', function(){
                expect (typeof Map.initMap).toBe('function')
            });
 
-           // it('should be invoked on success of load all items', function(){
-           //     spyOn(Map, 'initMap');
-           //     initMap();
-           //     expect(Map.initMap).toHaveBeenCalled();
-           // });
+          it('should populate infoWindow', function() {
+            spyOn(google.maps,'Map');
+            createController();
+            initMap({});
+            expect(google.maps.Map).toHaveBeenCalled();
+          });
+
+          xit('should add a marker',function() {
+            spyOn(Map,'addMarker');
+            createController();
+            initMap({});
+            expect(Map.addMarker).toHaveBeenCalled();
+          });
        });
+
+       describe('loadAllItems', function(){
+        it('should make a GET req to /api/items', function() {
+          $httpBackEnd.expect('/api/items');
+          loadAllItems();
+        });
+
+        xit('should re-init the map',function(){
+          spyOn(Map,'initMap');
+          createController();
+          loadAllItems();
+          expect(Map.initMap).toHaveBeenCalled();
+        });
+       });
+
+       describe('addMarker', function() {
+        it('should be a function', function(){
+          expect(typeof Map.addMarker).toBe('function');
+        });
+
+        xit('should create new markers', function() {
+          createController();
+          spyOn(google.maps.Animation,'DROP');
+          addMarker({}, {itemLocation:{lat:1,lng:1}});
+          expect(google.maps.Animation.DROP).toHaveBeenCalled();
+        });
+       });
+   });
+
+   describe('the global window tests', function(){
+    it('uberInfo should be a function', function(){
+        expect(typeof window.uberInfo).toEqual('function');
+    });
+
+    it('uberInfo should make a POST to /api/uberInfo for price data', function() {
+      createController();
+      $httpBackEnd.expectPOST('/api/uberInfo');
+      window.uberInfo(1,1,{});
+    });
+
    });
 
  

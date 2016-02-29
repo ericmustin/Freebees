@@ -9,6 +9,7 @@ module.exports = function(app){
   app.post('/submit', ItemFuncs.saveItem);
   app.post('/pickup',ItemFuncs.removeItem);
   app.post('/api/uber',ItemFuncs.uberInfo);
+  app.post('/submitWork', ItemFuncs.saveWork);
 
   //any other route will load root
   app.get('*', function(req, res){

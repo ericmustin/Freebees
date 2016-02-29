@@ -6,7 +6,12 @@ var ItemSchema = new mongoose.Schema ({
   //ItemSchema table has a column for itemName, which is a string
   itemName :{
     type: String,
-    required: true
+    required: false
+  },
+
+  worker : {
+    type: String,
+    required: false
   },
 
   //ItemSchema table has a column for createdAt and itemLocation, which is an object with lat and lng props
