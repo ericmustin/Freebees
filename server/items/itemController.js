@@ -156,7 +156,71 @@ module.exports = {
       .catch(function(err){
         console.log('Error when removeItem invoked - deleting row from db failed. Error: ', err);
       });
+  },
+
+  saveWork: function(req,res) {
+
+    var worker = req.body.worker;
+    var itemLocation = req.body.LatLng;
+    var date = req.body.createdAt;
+    var eventTime=req.body.eventTime;
+    var create;
+    var url = 'https://sandbox-api.uber.com/v1/estimates/price?start_latitude='+itemLocation.lat+'&start_longitude='+itemLocation.lng+'&end_latitude=37.7878865&end_longitude=-122.40005629999997&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
+    var options =  {
+    url: url,
+    method: 'GET'
+    };
+    request.get(options, function(err, response,body) {      
+      console.log(body);
+      var prices = JSON.parse(body);
+
+      var bestPrice = (prices.prices[0].estimate);
+
+
+
+
+    var findOne = Q.nbind(Item.findOne, Item);
+
+    findOne({
+      worker: worker,
+      itemLng: itemLocation.lng,
+      itemLat: itemLocation.lat
+    })
+
+    .then(function(person) {
+      if(person) {
+        console.log("Hey! You're already asking for free labor! Knock it off!");
+        res.status(400).send('invalid request');
+      } else {
+        create = Q.nbind(Item.create, Item);
+        console.log("In item controller!");
+        newWorker = {
+            worker: worker,
+            itemLocation: itemLocation,
+            itemLng: itemLocation.lng,
+            itemLat: itemLocation.lat,
+            eventTime: eventTime,
+            createdAt: date,
+            price: bestPrice
+          };
+
+          create(newWorker)
+            .then(function(data) {
+              console.log("we've saved!", data);
+              res.send(data);
+            })
+            .catch(function(err) {
+              console.log("Nope. Creation FAILURE. Either didn't create or didn't save to database!");
+            });
+      }
+    })
+
+    .catch(function(err) {
+      console.log('Whoops. Something went wrong buddy. Check error: ', err);
+    });
+  });
   }
+
 };
 
 

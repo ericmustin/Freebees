@@ -12,7 +12,7 @@ var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', '
   $urlRouterProvider.otherwise('/home');
 })
 //dependencies injected include DBActions factory and Map factory
-.controller('FormController', function($scope, $http, DBActions, Map){
+.controller('FormController', function($scope, $http, DBActions, DBWActions, Map){
 $scope.user = {};
 
 $scope.datepickers = {
@@ -133,6 +133,19 @@ $scope.toggleMin = function() {
     $scope.clearForm();
   };
 
+  $scope.sendMPost = function() {
+    var lowerCaseWorker = $scope.user.worker.toLowerCase();
+
+    $scope.inputtedAddress = document.getElementById('inputAddress').value;
+    console.log($scope.formData.dt);
+    Map.geocodeAddress(geocoder, Map.map, $scope.inputtedAddress, function(converted){
+      //after address converted, save user input item and location to db
+      DBWActions.saveToWDB({worker: lowerCaseWorker, LatLng: converted, createdAt: new Date(), eventTime: $scope.dateAdjust($scope.formData.dt)});
+    });
+    $scope.clearForm();
+
+  };
+
   //this function filters map based on what user enters into filter field
   $scope.filterMap = function(){
     //convert inputted filter item to lowerCase so that matches with lowerCase values stored in db
@@ -188,11 +201,13 @@ $scope.toggleMin = function() {
   //the 'toSave' parameter is an object that will be entered into database,
   //'toSave' has item prop and LatLng properties
   var saveToDB = function(toSave){
+    console.log('waddup1');
   return $http.post('/submit', toSave)
 
     //after item has been saved to db, returned data has a data property
     //so we need to access data.data, see below
     .then(function(data){
+      console.log('waddup');
       Map.stopSpinner();
       //data.data has itemName prop, itemLocation prop, and _id prop, which are all expected since this is how
       //our mongoDB is formatted. Anything returned from db should have these props
@@ -240,5 +255,25 @@ $scope.toggleMin = function() {
     saveToDB: saveToDB,
     filterDB: filterDB,
     removeFromDB: removeFromDB
+  };
+})
+
+.factory('DBWActions', function($http, Map) {
+  var saveToWDB = function(saveWaa) {
+    return $http.post('/submitWork', saveWaa)
+
+    .then(function(data){
+      Map.stopSpinner();
+      console.log(data.data);
+      console.log('were adding new marker');
+      Map.addMarker(map, data.data, infoWindow);
+
+    }, function(err){
+      console.log('You f**cked up. Error: ', err);
+    });
+  };
+
+  return {
+    saveToWDB: saveToWDB
   };
 });
