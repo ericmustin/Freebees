@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', 'ui.router'])
+var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', 'ui.router', 'ngFileUpload'])
 
 .config(function ($stateProvider, $urlRouterProvider) {
   $stateProvider
@@ -12,9 +12,9 @@ var app = angular.module('myApp', ['map.services', 'ui.bootstrap','ngAnimate', '
   $urlRouterProvider.otherwise('/home');
 })
 //dependencies injected include DBActions factory and Map factory
-.controller('FormController', function($scope, $http, DBActions, DBWActions, Map){
+.controller('FormController', function($scope, $http, DBActions, DBWActions, Map, Upload){
 $scope.user = {};
-
+$scope.image={}
 $scope.datepickers = {
         dt: false,
         dtSecond: false
@@ -82,6 +82,27 @@ $scope.toggleMin = function() {
     return obj;
   };
 
+  $scope.submit=function(){
+    console.log('$scope.image.file', $scope.image.file);
+    if($scope.image.file){
+      console.log('in submit if statement');
+      $scope.upload($scope.image.file);
+    }else {
+      sendPost();
+    }
+  };
+
+  $scope.upload=function(file){
+    Upload.upload({
+      url: 'api/item/image',
+      data: {file: file}
+    })
+    .success(function(response){
+      console.log('line 99 of controller', response);
+      $scope.sendPost(response)
+    });
+  };
+
   window.uberInfo = function(lat,lng,thing) {
     // console.log('holla?');
     if(navigator.geolocation){
@@ -119,7 +140,7 @@ $scope.toggleMin = function() {
     return itemString.toLowerCase();
   };
 
-  $scope.sendPost = function(){
+  $scope.sendPost = function(imageUrl){
     //convert inputted item name to lowerCase
 
     var lowerCaseItem = convertToLowerCase($scope.user.item);
@@ -128,7 +149,7 @@ $scope.toggleMin = function() {
     $scope.inputtedAddress =  document.getElementById('inputAddress').value;
     Map.geocodeAddress(geocoder, Map.map, $scope.inputtedAddress, function(converted){
       //after address converted, save user input item and location to db
-      DBActions.saveToDB({item: lowerCaseItem, LatLng: converted, createdAt: new Date(), eventTime: $scope.dateAdjust($scope.formData.dt)});
+      DBActions.saveToDB({item: lowerCaseItem, LatLng: converted, createdAt: new Date(), eventTime: $scope.dateAdjust($scope.formData.dt), itemImageUrl: imageUrl});
     });
     $scope.clearForm();
   };

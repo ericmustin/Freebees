@@ -133,9 +133,12 @@ var addMarker = function(map, instance, infoWindow, timeout){
 
     //creates a listener that will attach this instance's data to the global info window and open it
     google.maps.event.addListener(marker, 'click', function(){
-
+      var image='http://emojipedia-us.s3.amazonaws.com/cache/83/ef/83efaa94818d3afe45de8a4737e1ca87.png';
+      if(instance.itemImageUrl!==undefined){
+        image=instance.itemImageUrl;
+      }
       //turn our mongo-stored stringified date into a JS date obj that is then formatted
-      infoWindow.setContent(nameOnDom+' <br><button class="createdAt" value="500" onclick="uberInfo('+instance.itemLat+','+instance.itemLng+',this)" data-lat="'+instance.itemLat+'" data-lng="'+instance.itemLng+'">This Item Was posted on '+formatDate(new Date(instance.createdAt))+' and is good until '+instance.eventTime.month+'/'+instance.eventTime.day+' </button>');
+      infoWindow.setContent(nameOnDom+' <br><button class="createdAt" value="500" onclick="uberInfo('+instance.itemLat+','+instance.itemLng+',this)" data-lat="'+instance.itemLat+'" data-lng="'+instance.itemLng+'">This Item Was posted on '+formatDate(new Date(instance.createdAt))+' and is good until '+instance.eventTime.month+'/'+instance.eventTime.day+'  </button> <img src="'+image+'">' );
       infoWindow.open(map, this);
     });
   }, timeout);
