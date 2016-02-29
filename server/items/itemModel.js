@@ -42,6 +42,10 @@ var ItemSchema = new mongoose.Schema ({
   price: {
     type: String,
     required: true
+  },
+  itemImageUrl: {
+    type: String,
+    require: false
   }
 });
 

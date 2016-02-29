@@ -6,9 +6,12 @@ if either someFunc() or .then() fails. Method #2 also closely resembles traditio
 whereas method #1 more closely resembles promise methodology. Method #2 can sometimes be helpful
 for some edge cases. We use both methods for practice implementing both and remain consistent within each
 individual file.*/
-
+var express=require('express');
 var mongoose = require('mongoose');
 var request = require('request');
+var fs=require('fs');
+var cloudinary = require('cloudinary');
+var promise = require('bluebird');
 
 //Item is a model (i.e. row) that fits into the db, it has itemName and itemLocation props
 var Item = require('./itemModel.js');
@@ -26,7 +29,24 @@ var uber = new Uber({
   name: 'Pmates2People.herokuapp.com'
 });
 
+promise.promisify(cloudinary.uploader.upload);
+var _imageConfig = {
+  cloud_name: 'freebees',
+  api_key: 873651627853889,
+  api_secret: 'xitP65s62bXBn5SbDbyrP2Z3wHI'
 
+};
+
+function _uploadImageToCloudinary(imagePath) {
+  return cloudinary.uploader.upload(imagePath)
+    .then(function (response) {
+      console.log("made it to uploadImageToCloudinary, url is", response.url)
+      imageURL=response.url;
+      return response;
+    });
+};
+
+cloudinary.config(_imageConfig);
 
 module.exports = {
 
@@ -61,6 +81,7 @@ module.exports = {
     var itemLocation = req.body.LatLng;
     var date = req.body.createdAt;
     var eventTime=req.body.eventTime;
+    var itemImageUrl=req.body.itemImageUrl;
     var create;
     var url = 'https://sandbox-api.uber.com/v1/estimates/price?start_latitude='+itemLocation.lat+'&start_longitude='+itemLocation.lng+'&end_latitude=37.7878865&end_longitude=-122.40005629999997&server_token=GWecrboFqcMHtLGksCFMJ2mIPg6Yf85n2oxqHya0';
     var options =  {
@@ -100,7 +121,8 @@ module.exports = {
             itemLat: itemLocation.lat,
             eventTime: eventTime,
             createdAt: date,
-            price: bestPrice
+            price: bestPrice,
+            itemImageUrl: itemImageUrl
      
           };
 
@@ -119,6 +141,21 @@ module.exports = {
       });
     });
   },
+
+  //image uploads
+  upload: function (req, res) {
+    var filePath = req.files.file.path;
+    console.log('file Path', filePath)
+    var image = req.body.item;
+
+    _uploadImageToCloudinary(filePath)
+      .then(function (result) {
+        var url = result.url;
+        console.log('uploaded url yay!', url);
+        res.send(url);
+
+      })
+    },
 
   //The below function returns all rows from the db. It is called whenever user visits '/' or '/api/links'
   getAllItems: function(req, res){
